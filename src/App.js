@@ -50,11 +50,20 @@ function App() {
       this.effect=effect
       this.x=x
       this.y= y
+      this.originX=Math.floor(x)
+      this.originY=Math.floor(y)
       this.size=size
       this.ctx=ctx
       this.vx=Math.random(5) -1
       this.vy=Math.random(2)-1
       this.color=color
+      this.dx=0
+      this.dy=0
+      this.force=0
+      this.distance=0
+      this.friction=0.95
+      this.angle=0
+      this.ease= 0.01
       //this.ctx.drawImage(this.image,0,0)
      }
 
@@ -64,8 +73,27 @@ function App() {
      }
 
      update(){
-      this.x+= this.vx
-      this.y+= this.vy
+      // here we need to get some speed based properties
+      // get distance 
+
+      if(this.effect.mouse.x && this.effect.mouse.y){
+        this.dx= this.x - this.effect.mouse.x 
+        this.dy= this.y - this.effect.mouse.y   
+        this.distance=  (this.dx * this.dx) + (this.dy * this.dy )
+        this.force= this.effect.mouse.radius / this.distance 
+        this.angle = Math.atan2(this.dy, this.dx);
+  
+        
+        if(this.distance <= this.effect.mouse.radius){
+          this.vx += this.force * Math.cos(this.angle) 
+          this.vy += this.force * Math.sin(this.angle)
+          
+        }
+        this.x+=  (this.vx *= this.friction) + (this.originX-this.x)   * this.ease // multiple by force
+        this.y+= (this.vy *=   this.friction) + (this.originY - this.y)  * this.ease
+      }
+
+      
      }
   }
   class Effect{
@@ -79,7 +107,20 @@ function App() {
       this.centralY= height * 0.5
       this.horizontalX=Math.floor(this.centralX - this.image.width *0.5)
       this.horizontalY=Math.floor(this.centralY - this.image.height *0.5)
-      this.gap=4
+      
+      this.gap=6
+
+      this.mouse={
+        radius:3000,
+        x:undefined,
+        y:undefined
+      }
+
+      window.addEventListener("mousemove",(event)=>{
+        this.mouse.x=event.x 
+        this.mouse.y=event.y  
+        
+      })
 
      }
      init(){
@@ -87,7 +128,7 @@ function App() {
       // we need to get the iamge Data 
     
       let imageDataArray= this.ctx.getImageData(0,0,this.width,this.height).data
-
+      
       // we need to loop through the array 
 
       for (let y=0; y<= this.height; y+=this.gap ){
@@ -114,10 +155,6 @@ function App() {
 
       }
       
-      for(let i=0; i<=10;i++){
-        
-        
-      }
      }
 
      draw(){
@@ -149,4 +186,4 @@ export default App;
 // 1 .Partcle and 2 for drawing All Paeticles
 // we need to move the particles 
 // we need to draw thw image
-
+//Now  we Need to add MOuse cursor event and movement function
